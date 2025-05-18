@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Van Reports</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: #f7f7f7;
+        margin: 0;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .date-group {
+        background: white;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .date-group:hover {
+        background: #f0f0f0;
+      }
+      .date-title {
+        font-weight: bold;
+        font-size: 1.2em;
+        display: flex;
+        justify-content: space-between;
+      }
+      .report-card {
+        background: #fff;
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 0 4px rgba(0, 0, 0, 0.08);
+      }
+      .report-header {
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+      .images {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+      .images img {
+        max-width: 100px;
+        height: 75px;
+        border-radius: 4px;
+        object-fit: cover;
+      }
+      @media (max-width: 600px) {
+        .date-title {
+          flex-direction: column;
+        }
+        .images img {
+          max-width: 80px;
+          height: 60px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Van Reports by Date</h1>
+    <div id="reportsContainer">Loading reports...</div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyAqSsrM59dxLgl-dm6OJGuDW32EaDdqMjs",
+        authDomain: "eod-tracker.firebaseapp.com",
+        projectId: "eod-tracker",
+        storageBucket: "eod-tracker.appspot.com",
+        messagingSenderId: "642820935153",
+        appId: "1:642820935153:web:8b23d0f430ad07e9680850",
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+
+      const reportsContainer = document.getElementById("reportsContainer");
+
+      function formatDateKey(date) {
+        const d = new Date(date);
+        return d.toLocaleDateString();
+      }
+
+      function formatTime(date) {
+        return new Date(date).toLocaleTimeString();
+      }
+
+      async function loadReports() {
+        const bodSnap = await db.collection("bodReports").get();
+        const eodSnap = await db.collection("eod_entries").get();
+
+        const groupedReports = {};
+
+        const processDoc = (doc, type) => {
+          const data = doc.data();
+          const time = data.date || data.timestamp?.toDate?.() || new Date();
+          const day = formatDateKey(time);
+
+          if (!groupedReports[day]) groupedReports[day] = [];
+
+          groupedReports[day].push({
+            type,
+            user: data.user || "Unknown",
+            time: formatTime(time),
+            van: data.van || "N/A",
+            fuel: data.fuelLevel || "N/A",
+            notes: data.issueNotes || data.jobNotes || "None",
+            images: data.issueImages || data.imageURLs || [],
+          });
+        };
+
+        bodSnap.forEach((doc) => processDoc(doc, "BOD"));
+        eodSnap.forEach((doc) => processDoc(doc, "EOD"));
+
+        const sortedDates = Object.keys(groupedReports).sort(
+          (a, b) => new Date(b) - new Date(a)
+        );
+
+        reportsContainer.innerHTML = "";
+
+        sortedDates.forEach((date) => {
+          const groupDiv = document.createElement("div");
+          groupDiv.className = "date-group";
+
+          const dateTitle = document.createElement("div");
+          dateTitle.className = "date-title";
+          dateTitle.textContent = date;
+
+          groupDiv.appendChild(dateTitle);
+
+          const reports = groupedReports[date];
+          reports.forEach((r) => {
+            const card = document.createElement("div");
+            card.className = "report-card";
+            card.innerHTML = `
+              <div class="report-header">${r.type} Report by ${r.user}</div>
+              <div><strong>Time:</strong> ${r.time}</div>
+              <div><strong>Van:</strong> ${r.van}</div>
+              <div><strong>Fuel:</strong> ${r.fuel}</div>
+              <div><strong>Notes:</strong> ${r.notes}</div>
+            `;
+            const imgDiv = document.createElement("div");
+            imgDiv.className = "images";
+            r.images.forEach((url) => {
+              if (url) {
+                const img = document.createElement("img");
+                img.src = url;
+                imgDiv.appendChild(img);
+              }
+            });
+            card.appendChild(imgDiv);
+            groupDiv.appendChild(card);
+          });
+
+          reportsContainer.appendChild(groupDiv);
+        });
+      }
+
+      loadReports();
+    </script>
+  </body>
+</html>
