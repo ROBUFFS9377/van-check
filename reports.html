@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EOD Reports</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: #f7f7f7;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .report-card {
+        background: white;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      }
+      .report-header {
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+      .images {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+      .images img {
+        max-width: 120px;
+        border-radius: 5px;
+        object-fit: cover;
+        height: 90px;
+        box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>BOD Reports</h1>
+
+    <div id="reportsContainer">Loading reports...</div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyAqSsrM59dxLgl-dm6OJGuDW32EaDdqMjs",
+        authDomain: "eod-tracker.firebaseapp.com",
+        projectId: "eod-tracker",
+        storageBucket: "eod-tracker.appspot.com",
+        messagingSenderId: "642820935153",
+        appId: "1:642820935153:web:8b23d0f430ad07e9680850",
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+      const storage = firebase.storage();
+
+      const reportsContainer = document.getElementById("reportsContainer");
+
+      async function fetchReports() {
+        reportsContainer.innerHTML = "Loading reports...";
+
+        try {
+          const snapshot = await db
+            .collection("bodReports")
+            .orderBy("date", "desc")
+            .get();
+
+          if (snapshot.empty) {
+            reportsContainer.innerHTML = "<p>No reports found.</p>";
+            return;
+          }
+
+          reportsContainer.innerHTML = "";
+
+          for (const doc of snapshot.docs) {
+            const data = doc.data();
+
+            // Format the date from ISO string
+            let formattedDate = "Unknown date";
+            if (data.date) {
+              const rawDate = new Date(data.date);
+              formattedDate =
+                rawDate.toLocaleDateString() +
+                " " +
+                rawDate.toLocaleTimeString();
+            }
+
+            const card = document.createElement("div");
+            card.classList.add("report-card");
+
+            card.innerHTML = `
+              <div class="report-header">User: ${data.user || "Unknown"}</div>
+              <div><strong>Date:</strong> ${formattedDate}</div>
+              <div><strong>Van:</strong> ${data.van || "N/A"}</div>
+              <div><strong>Fuel Level:</strong> ${data.fuelLevel || "N/A"}</div>
+              <div><strong>Issues Found:</strong> ${
+                data.issuesFound ? "Yes" : "No"
+              }</div>
+              <div><strong>Notes:</strong> ${data.issueNotes || "None"}</div>
+            `;
+
+            const imagesDiv = document.createElement("div");
+            imagesDiv.classList.add("images");
+            card.appendChild(imagesDiv);
+
+            if (data.issueImages && Array.isArray(data.issueImages)) {
+              for (const url of data.issueImages) {
+                const img = document.createElement("img");
+                img.src = url;
+                imagesDiv.appendChild(img);
+              }
+            }
+
+            reportsContainer.appendChild(card);
+          }
+        } catch (error) {
+          reportsContainer.innerHTML = `<p>Error loading reports: ${error.message}</p>`;
+          console.error("Error fetching reports:", error);
+        }
+      }
+
+      fetchReports();
+    </script>
+  </body>
+</html>
