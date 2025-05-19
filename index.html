@@ -31,6 +31,18 @@
         text-align: center;
       }
 
+      .bod-button {
+        background-color: #90ee90; /* light green */
+      }
+
+      .eod-button {
+        background-color: #add8e6; /* light blue */
+      }
+
+      .reports-button {
+        background-color: #ff4d4d; /* red */
+      }
+
       .bod-button,
       .eod-button,
       .reports-button {
@@ -38,7 +50,6 @@
         width: 100%;
         padding: 15px;
         margin: 10px 0;
-        background-color: purple;
         color: white;
         text-decoration: none;
         border: none;
@@ -152,7 +163,7 @@
       const correctPassword = "TakeOver512";
 
       reportsBtn.addEventListener("click", (e) => {
-        e.preventDefault(); // Prevent anchor from navigating
+        e.preventDefault();
         errorMsg.textContent = "";
         passwordInput.value = "";
         passwordOverlay.style.display = "flex";
