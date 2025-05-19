@@ -225,67 +225,93 @@
         <label><strong>Upload Images:</strong></label>
         <div class="image-group">
           <div>
-            <label>Front of the Van</label>
+            <label for="image0" class="camera-label">📷 Front of the Van</label>
             <input
               type="file"
               accept="image/*"
               capture="environment"
+              id="image0"
               class="image-input"
+              style="display: none"
             />
             <div class="preview"></div>
           </div>
           <div>
-            <label>Left Side</label>
+            <label for="image1" class="camera-label">📷 Left Side</label>
             <input
               type="file"
               accept="image/*"
               capture="environment"
+              id="image1"
               class="image-input"
+              style="display: none"
             />
             <div class="preview"></div>
           </div>
           <div>
-            <label>Back</label>
+            <label for="image2" class="camera-label">📷 Back</label>
             <input
               type="file"
               accept="image/*"
               capture="environment"
+              id="image2"
               class="image-input"
+              style="display: none"
             />
             <div class="preview"></div>
           </div>
           <div>
-            <label>Right Side</label>
+            <label for="image3" class="camera-label">📷 Right Side</label>
             <input
               type="file"
               accept="image/*"
               capture="environment"
+              id="image3"
               class="image-input"
+              style="display: none"
             />
             <div class="preview"></div>
           </div>
           <div>
-            <label>Work Area</label>
+            <label for="image4" class="camera-label">📷 Work Area</label>
             <input
               type="file"
               accept="image/*"
               capture="environment"
+              id="image4"
               class="image-input"
+              style="display: none"
             />
             <div class="preview"></div>
           </div>
           <div>
-            <label>Parking Spot</label>
+            <label for="image5" class="camera-label">📷 Parking Spot</label>
             <input
               type="file"
               accept="image/*"
               capture="environment"
+              id="image5"
               class="image-input"
+              style="display: none"
             />
             <div class="preview"></div>
           </div>
         </div>
       </section>
+
+      <style>
+        .camera-label {
+          display: inline-block;
+          padding: 10px 12px;
+          background-color: purple;
+          color: white;
+          font-weight: bold;
+          border-radius: 6px;
+          cursor: pointer;
+          margin-bottom: 6px;
+          user-select: none;
+        }
+      </style>
 
       <section class="form-group">
         <label
