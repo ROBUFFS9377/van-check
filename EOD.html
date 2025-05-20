@@ -232,9 +232,10 @@
               capture="environment"
               id="image0"
               class="image-input"
+              data-preview="preview0"
               style="display: none"
             />
-            <div class="preview"></div>
+            <div class="preview" id="preview0"></div>
           </div>
           <div>
             <label for="image1" class="camera-label">📷 Left Side</label>
@@ -244,9 +245,10 @@
               capture="environment"
               id="image1"
               class="image-input"
+              data-preview="preview1"
               style="display: none"
             />
-            <div class="preview"></div>
+            <div class="preview" id="preview1"></div>
           </div>
           <div>
             <label for="image2" class="camera-label">📷 Back</label>
@@ -256,9 +258,10 @@
               capture="environment"
               id="image2"
               class="image-input"
+              data-preview="preview2"
               style="display: none"
             />
-            <div class="preview"></div>
+            <div class="preview" id="preview2></div>
           </div>
           <div>
             <label for="image3" class="camera-label">📷 Right Side</label>
@@ -268,9 +271,10 @@
               capture="environment"
               id="image3"
               class="image-input"
+              data-preview="preview3"
               style="display: none"
             />
-            <div class="preview"></div>
+            <div class="preview"id="preview3"></div>
           </div>
           <div>
             <label for="image4" class="camera-label">📷 Work Area</label>
@@ -280,9 +284,10 @@
               capture="environment"
               id="image4"
               class="image-input"
+              data-preview="preview4"
               style="display: none"
             />
-            <div class="preview"></div>
+            <div class="preview" id="preview4"></div>
           </div>
           <div>
             <label for="image5" class="camera-label">📷 Parking Spot</label>
@@ -292,9 +297,10 @@
               capture="environment"
               id="image5"
               class="image-input"
+              data-preview="preview5"
               style="display: none"
             />
-            <div class="preview"></div>
+            <div class="preview" id="preview5"></div>
           </div>
         </div>
       </section>
@@ -464,23 +470,26 @@
       }
 
       document.addEventListener("DOMContentLoaded", () => {
-        document.querySelectorAll(".image-input").forEach((input) => {
-          input.addEventListener("change", function () {
-            const file = this.files[0];
-            const preview = this.nextElementSibling;
-            preview.innerHTML = "";
-            if (file && file.type.startsWith("image/")) {
-              const reader = new FileReader();
-              reader.onload = (e) => {
-                const img = document.createElement("img");
-                img.src = e.target.result;
-                preview.appendChild(img);
-              };
-              reader.readAsDataURL(file);
-            }
-          });
-        });
-      });
+  document.querySelectorAll(".image-input").forEach((input) => {
+    const previewId = input.getAttribute("data-preview");
+    const previewContainer = document.getElementById(previewId);
+
+    input.addEventListener("change", function () {
+      previewContainer.innerHTML = "";
+
+      const file = this.files[0];
+      if (file && file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = document.createElement("img");
+          img.src = e.target.result;
+          previewContainer.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  });
+});
 
       document
         .getElementById("saveEntryBtn")
