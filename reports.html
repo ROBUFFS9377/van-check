@@ -225,7 +225,7 @@
         for (const van in latestMileage) {
           const latest = latestMileage[van]?.mileage ?? 0;
           const last = lastOilChange[van]?.mileage ?? 0;
-          if (latest - last >= 7000) {
+          if (latest - last >= 5000) {
             const warn = document.createElement("div");
             warn.className = "warning";
             warn.textContent = `${van.toUpperCase()} needs an oil change! (${
