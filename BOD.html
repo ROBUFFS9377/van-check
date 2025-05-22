@@ -403,25 +403,25 @@
       // Persist session across page loads
       auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-      const allowedDomain = "@ubreakifix.com";
-
-      auth.onAuthStateChanged((user) => {
-        if (user) {
-          const email = user.email || "";
-          if (!email.endsWith(allowedDomain)) {
-            alert("Access denied: unauthorized email domain.");
-            auth.signOut();
-            window.location.href = "index.html";
-          }
-        } else {
-          if (
-            window.location.pathname !== "/index.html" &&
-            window.location.pathname !== "/"
-          ) {
-            window.location.href = "index.html";
-          }
-        }
-      });
+    auth.onAuthStateChanged((user) => {
+  if (user) {
+    const email = user.email || "";
+    const domain = email.split("@")[1]?.toLowerCase();
+    if (domain !== "ubreakifix.com") {
+      alert("Access denied: unauthorized email domain.");
+      auth.signOut();
+      window.location.href = "index.html";
+    }
+  } else {
+    // Redirect if not logged in and not on homepage
+    if (
+      window.location.pathname !== "/index.html" &&
+      window.location.pathname !== "/"
+    ) {
+      window.location.href = "index.html";
+    }
+  }
+});
 
       function signInWithGoogle() {
         const provider = new firebase.auth.GoogleAuthProvider();
