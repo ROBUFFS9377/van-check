@@ -60,18 +60,6 @@
         text-align: center;
       }
 
-      #signInBtn {
-        display: block;
-        margin: 20px auto 0;
-        padding: 12px 24px;
-        background-color: #4285f4;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        cursor: pointer;
-      }
-
       #rtLogo {
         width: 150px;
         max-width: 80%;
@@ -135,6 +123,39 @@
         margin-top: 10px;
         min-height: 1.2em;
       }
+
+      /* Auth Modal */
+      #authOverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.75);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #authPrompt {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        text-align: center;
+        max-width: 300px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+      }
+
+      #authPrompt button {
+        padding: 10px 20px;
+        background-color: #4285f4;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
@@ -144,7 +165,6 @@
       <a href="BOD.html" class="bod-button">BOD</a>
       <a href="EOD.html" class="eod-button">EOD</a>
       <a href="#" class="reports-button" id="reportsBtn">Reports</a>
-      <button id="signInBtn">Sign in with Google</button>
     </div>
 
     <img src="images/logo.png" alt="RT Report Logo" id="rtLogo" />
@@ -152,12 +172,7 @@
     <div id="passwordOverlay">
       <div id="passwordPrompt">
         <h3>Enter Password to Access Reports</h3>
-        <input
-          type="password"
-          id="passwordInput"
-          placeholder="Password"
-          autofocus
-        />
+        <input type="password" id="passwordInput" placeholder="Password" autofocus />
         <div>
           <button class="confirm-btn" id="confirmBtn">Confirm</button>
           <button class="cancel-btn" id="cancelBtn">Cancel</button>
@@ -166,7 +181,14 @@
       </div>
     </div>
 
-    <!-- Firebase Auth -->
+    <div id="authOverlay">
+      <div id="authPrompt">
+        <h2>Sign in with your @ubreakifix.com Google Account</h2>
+        <button onclick="signInWithGoogle()">Sign in with Google</button>
+        <p id="authError" style="color: red; margin-top: 10px;"></p>
+      </div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
     <script>
@@ -182,30 +204,31 @@
       const auth = firebase.auth();
 
       auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-      const allowedDomain = "ubreakifix.com";
 
       auth.onAuthStateChanged((user) => {
+        const overlay = document.getElementById("authOverlay");
+        const errorText = document.getElementById("authError");
+
         if (user) {
           const email = user.email || "";
           const domain = email.split("@")[1]?.toLowerCase();
-          if (domain !== allowedDomain) {
-            alert("Access denied: unauthorized email domain.");
+          if (domain === "ubreakifix.com") {
+            overlay.style.display = "none";
+          } else {
+            errorText.textContent = "Access denied: unauthorized email.";
             auth.signOut();
-            window.location.href = "index.html";
           }
+        } else {
+          overlay.style.display = "flex";
         }
       });
 
       function signInWithGoogle() {
         const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider)
-          .then((result) => {
-            console.log("Signed in as:", result.user.email);
-          })
-          .catch((error) => {
-            console.error("Login error:", error);
-            alert("Login failed.");
-          });
+        auth.signInWithPopup(provider).catch((error) => {
+          document.getElementById("authError").textContent = "Login failed.";
+          console.error("Login error:", error);
+        });
       }
 
       function signOut() {
@@ -214,8 +237,7 @@
         });
       }
 
-      document.getElementById("signInBtn").addEventListener("click", signInWithGoogle);
-
+      // Password modal logic
       const reportsBtn = document.getElementById("reportsBtn");
       const passwordOverlay = document.getElementById("passwordOverlay");
       const passwordInput = document.getElementById("passwordInput");
