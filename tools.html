@@ -305,12 +305,12 @@
     <script>
       // Initialize Firebase (replace with your actual config)
       const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_AUTH_DOMAIN",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_STORAGE_BUCKET",
-        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-        appId: "YOUR_APP_ID",
+        apiKey: "AIzaSyAqSsrM59dxLgl-dm6OJGuDW32EaDdqMjs",
+        authDomain: "eod-tracker.firebaseapp.com",
+        projectId: "eod-tracker",
+        storageBucket: "eod-tracker.firebasestorage.app",
+        messagingSenderId: "642820935153",
+        appId: "1:642820935153:web:8b23d0f430ad07e9680850",
       };
 
       // Check if Firebase is already initialized
@@ -325,20 +325,35 @@
       const allowedDomain = "@ubreakifix.com";
 
       auth.onAuthStateChanged((user) => {
+        console.log("Firebase Auth State Changed. User:", user); // Log the user object
+
         if (user) {
           const email = user.email || "";
+          console.log("User email:", email); // Log the user's email
+          const allowedDomain = "@ubreakifix.com"; // Ensure this is correctly defined, it should be.
+
           if (!email.endsWith(allowedDomain)) {
-            alert("Access denied: unauthorized email domain.");
+            console.log(
+              "Access denied: Unauthorized email domain. Redirecting to index.html"
+            ); // Log before redirect
+            alert("Access denied: unauthorized email domain."); // This alert might be too quick to see
             auth.signOut();
             window.location.href = "index.html";
+          } else {
+            console.log("User authenticated and authorized. Access granted."); // Log if access is granted
           }
         } else {
-          // Redirect if not logged in and not on homepage
+          console.log("No user signed in. Checking pathname for redirect."); // Log if no user
           if (
             window.location.pathname !== "/index.html" &&
             window.location.pathname !== "/"
           ) {
+            console.log(
+              "Not on index.html and no user. Redirecting to index.html"
+            ); // Log before redirect
             window.location.href = "index.html";
+          } else {
+            console.log("On index.html and no user. Waiting for sign-in."); // Should only happen on index.html
           }
         }
       });
