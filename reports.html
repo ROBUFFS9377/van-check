@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Van Reports</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: #f7f7f7;
+        margin: 0;
+      }
+      .background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        background: url("images/graph.jpg") no-repeat center center;
+        background-size: cover;
+        opacity: 0.5;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .warning {
+        background-color: red;
+        color: white;
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 6px;
+        font-weight: bold;
+        text-align: center;
+      }
+      .filters {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap; /* Allow filters to wrap on smaller screens */
+      }
+      .filter-group label {
+        margin-right: 5px;
+        font-weight: bold;
+      }
+      select,
+      input[type="date"],
+      input[type="text"] {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        flex-grow: 1; /* Allow inputs to grow */
+        min-width: 120px; /* Ensure inputs have a minimum width */
+      }
+      .report-card {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .report-card h3 {
+        margin-top: 0;
+        color: #333;
+      }
+      .report-card p {
+        margin: 5px 0;
+      }
+      .report-card img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin-top: 10px;
+        border-radius: 4px;
+      }
+      .home-button {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: purple;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 16px;
+        margin-top: 10px;
+      }
+      .home-container {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        z-index: 10;
+      }
+      .image-gallery {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+      }
+      .image-gallery img {
+        max-width: 150px;
+        max-height: 100px;
+        object-fit: cover;
+        border: 1px solid #eee;
+        border-radius: 4px;
+      }
+      /* New styles for parts lookup */
+      .parts-lookup-section {
+        background: #e9e9e9;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: none; /* Initially hidden */
+      }
+      .parts-lookup-section.active {
+        display: block; /* Shown when active */
+      }
+      .parts-lookup-section h2 {
+        margin-top: 0;
+        color: #333;
+        margin-bottom: 15px;
+      }
+      .parts-search-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+      .parts-search-group input[type="text"] {
+        flex-grow: 1;
+      }
+      .parts-search-group button {
+        padding: 8px 15px;
+        background-color: purple;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .parts-results-container {
+        margin-top: 15px;
+        max-height: 300px; /* Limit height and add scroll */
+        overflow-y: auto;
+        border: 1px solid #eee;
+        padding: 10px;
+        border-radius: 4px;
+        background-color: #f9f9f9;
+      }
+      .parts-result-item {
+        padding: 8px 0;
+        border-bottom: 1px dashed #ddd;
+      }
+      .parts-result-item:last-child {
+        border-bottom: none;
+      }
+      .parts-result-item strong {
+        color: #555;
+      }
+      /* Style for the new "Parts" button */
+      .parts-button {
+        padding: 8px 15px;
+        background-color: #007bff; /* Blue color */
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        white-space: nowrap; /* Prevent button text from wrapping */
+      }
+      @media (max-width: 768px) {
+        .filters {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .filter-group {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="background"></div>
+
+    <div class="home-container">
+      <a href="index.html" class="home-button">Home</a>
+    </div>
+
+    <h1>Van Reports</h1>
+
+    <div class="warning" id="warningMessage" style="display: none"></div>
+
+    <div class="filters">
+      <div class="filter-group">
+        <label for="vanFilter">Van:</label>
+        <select id="vanFilter">
+          <option value="">All Vans</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="userFilter">User:</label>
+        <select id="userFilter">
+          <option value="">All Users</option>
+        </select>
+      </div>
+
+      <button id="togglePartsLookupBtn" class="parts-button">Parts</button>
+
+      <div class="filter-group">
+        <label for="dateFilter">Date:</label>
+        <input type="date" id="dateFilter" />
+      </div>
+
+      <div class="filter-group">
+        <label>
+          <input type="checkbox" id="onlyServiceCheckbox" /> Only Service
+          Entries
+        </label>
+      </div>
+    </div>
+
+    <section id="partsLookupSection" class="parts-lookup-section">
+      <h2>Parts & SKU Lookup</h2>
+      <div class="parts-search-group">
+        <input
+          type="text"
+          id="partSearchInput"
+          placeholder="Search by Part Name or SKU"
+        />
+        <button id="searchPartsBtn">Search</button>
+      </div>
+      <div id="partsResultsContainer" class="parts-results-container"></div>
+    </section>
+
+    <div id="reportsContainer"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyAqSsrM59dxLgl-dm6OJGuDW32EaDdqMjs",
+        authDomain: "eod-tracker.firebaseapp.com",
+        projectId: "eod-tracker",
+        storageBucket: "eod-tracker.firebasestorage.app",
+        messagingSenderId: "642820935153",
+        appId: "1:642820935153:web:8b23d0f430ad07e9680850",
+      };
+
+      firebase.initializeApp(firebaseConfig);
+
+      const db = firebase.firestore();
+      const storage = firebase.storage();
+
+      const vanFilter = document.getElementById("vanFilter");
+      const userFilter = document.getElementById("userFilter");
+      const dateFilter = document.getElementById("dateFilter");
+      const onlyServiceCheckbox = document.getElementById(
+        "onlyServiceCheckbox"
+      );
+      const reportsContainer = document.getElementById("reportsContainer");
+      const warningMessage = document.getElementById("warningMessage");
+
+      // Parts Lookup elements
+      const togglePartsLookupBtn = document.getElementById(
+        "togglePartsLookupBtn"
+      );
+      const partsLookupSection = document.getElementById("partsLookupSection");
+      const partSearchInput = document.getElementById("partSearchInput");
+      const searchPartsBtn = document.getElementById("searchPartsBtn");
+      const partsResultsContainer = document.getElementById(
+        "partsResultsContainer"
+      );
+
+      let allReports = [];
+      let allVans = [];
+      let allUsers = [];
+
+      async function loadReports() {
+        try {
+          const snapshot = await db
+            .collection("eod_reports")
+            .orderBy("timestamp", "desc")
+            .get();
+          allReports = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          console.log("Loaded Reports:", allReports); // Debugging
+
+          // Extract unique vans and users
+          const vansSet = new Set();
+          const usersSet = new Set();
+          allReports.forEach((report) => {
+            if (report.van) vansSet.add(report.van);
+            if (report.user) usersSet.add(report.user);
+          });
+          allVans = Array.from(vansSet).sort();
+          allUsers = Array.from(usersSet).sort();
+
+          populateFilters();
+          render();
+        } catch (error) {
+          console.error("Error loading reports:", error);
+          reportsContainer.innerHTML = "<p>Error loading reports.</p>";
+        }
+      }
+
+      function populateFilters() {
+        // Populate Van Filter
+        vanFilter.innerHTML = '<option value="">All Vans</option>';
+        allVans.forEach((van) => {
+          const option = document.createElement("option");
+          option.value = van;
+          option.textContent = van;
+          vanFilter.appendChild(option);
+        });
+
+        // Populate User Filter
+        userFilter.innerHTML = '<option value="">All Users</option>';
+        allUsers.forEach((user) => {
+          const option = document.createElement("option");
+          option.value = user;
+          option.textContent = user;
+          userFilter.appendChild(option);
+        });
+      }
+
+      function render() {
+        let filteredReports = [...allReports];
+
+        const selectedVan = vanFilter.value;
+        const selectedUser = userFilter.value;
+        const selectedDate = dateFilter.value; // YYYY-MM-DD
+        const showOnlyService = onlyServiceCheckbox.checked;
+
+        if (selectedVan) {
+          filteredReports = filteredReports.filter(
+            (report) => report.van === selectedVan
+          );
+        }
+
+        if (selectedUser) {
+          filteredReports = filteredReports.filter(
+            (report) => report.user === selectedUser
+          );
+        }
+
+        if (selectedDate) {
+          filteredReports = filteredReports.filter((report) => {
+            const reportDate = report.timestamp
+              ? new Date(report.timestamp.toDate()).toISOString().split("T")[0]
+              : "";
+            return reportDate === selectedDate;
+          });
+        }
+
+        if (showOnlyService) {
+          filteredReports = filteredReports.filter(
+            (report) => report.serviceChecked
+          );
+        }
+
+        reportsContainer.innerHTML = ""; // Clear previous reports
+
+        if (filteredReports.length === 0) {
+          reportsContainer.innerHTML =
+            "<p>No reports found matching criteria.</p>";
+          return;
+        }
+
+        let hasWarning = false;
+        filteredReports.forEach((report) => {
+          const reportDate = report.timestamp
+            ? new Date(report.timestamp.toDate()).toLocaleDateString()
+            : "N/A";
+          const reportTime = report.timestamp
+            ? new Date(report.timestamp.toDate()).toLocaleTimeString()
+            : "N/A";
+
+          const card = document.createElement("div");
+          card.className = "report-card";
+          card.innerHTML = `
+            <h3>Report for Van: ${report.van || "N/A"} by ${
+            report.user || "N/A"
+          }</h3>
+            <p><strong>Date:</strong> ${reportDate} ${reportTime}</p>
+            <p><strong>Fuel Level:</strong> ${report.fuelLevel || "N/A"}</p>
+            <p><strong>Jobs Completed:</strong> ${
+              report.jobsCompleted || "N/A"
+            }</p>
+            <p><strong>Notes for incomplete jobs:</strong> ${
+              report.jobNotes || "None"
+            }</p>
+            <p><strong>Mileage:</strong> ${report.mileage || "N/A"}</p>
+            <p><strong>Service Checked:</strong> ${
+              report.serviceChecked ? "Yes" : "No"
+            }</p>
+            <p><strong>Service Items:</strong> ${
+              report.serviceItems && report.serviceItems.length > 0
+                ? report.serviceItems.join(", ")
+                : "None"
+            }</p>
+            <p><strong>Other Service Notes:</strong> ${
+              report.otherServiceNotes || "None"
+            }</p>
+          `;
+
+          if (report.imageURLs && report.imageURLs.length > 0) {
+            const gallery = document.createElement("div");
+            gallery.className = "image-gallery";
+            report.imageURLs.forEach((url) => {
+              if (url) {
+                const img = document.createElement("img");
+                img.src = url;
+                img.alt = "EOD Image";
+                gallery.appendChild(img);
+              }
+            });
+            card.appendChild(gallery);
+          }
+
+          reportsContainer.appendChild(card);
+
+          // Check for warnings (e.g., if jobs completed is less than total)
+          const jobsMatch = (report.jobsCompleted || "").match(
+            /^(\d+)\s*\/\s*(\d+)$/
+          );
+          if (jobsMatch && parseInt(jobsMatch[1]) < parseInt(jobsMatch[2])) {
+            hasWarning = true;
+          }
+        });
+
+        if (hasWarning) {
+          warningMessage.style.display = "block";
+          warningMessage.textContent =
+            "Warning: Some reports indicate incomplete jobs.";
+        } else {
+          warningMessage.style.display = "none";
+        }
+      }
+
+      // Add event listeners for filters
+      vanFilter.addEventListener("change", render);
+      userFilter.addEventListener("change", render);
+      dateFilter.addEventListener("change", render);
+      onlyServiceCheckbox.addEventListener("change", render);
+
+      // Toggle Parts Lookup Section visibility
+      togglePartsLookupBtn.addEventListener("click", () => {
+        partsLookupSection.classList.toggle("active");
+        if (partsLookupSection.classList.contains("active")) {
+          // Clear previous search results and input when showing the section
+          partSearchInput.value = "";
+          partsResultsContainer.innerHTML =
+            "<p>Please enter a part name or SKU to search.</p>";
+        }
+      });
+
+      // Parts Lookup Functions
+      async function searchParts() {
+        const query = partSearchInput.value.toLowerCase().trim();
+        partsResultsContainer.innerHTML = ""; // Clear previous results
+
+        if (query.length === 0) {
+          partsResultsContainer.innerHTML =
+            "<p>Please enter a part name or SKU to search.</p>";
+          return;
+        }
+
+        try {
+          // Assuming a 'parts' collection in Firestore with 'name' and 'sku' fields
+          const partsRef = db.collection("parts");
+          let snapshot;
+
+          // Attempt to search by SKU first (exact match)
+          snapshot = await partsRef
+            .where("sku", "==", query.toUpperCase())
+            .get();
+
+          if (snapshot.empty) {
+            // If no exact SKU match, search by name (contains)
+            // Note: Firestore does not support 'contains' directly for partial string matching.
+            // For production, you might need a more advanced search solution (e.g., Algolia, a backend search function).
+            // This is a basic prefix search simulation.
+            snapshot = await partsRef
+              .where("name", ">=", query)
+              .where("name", "<=", query + "\uf8ff")
+              .get();
+          }
+
+          if (snapshot.empty) {
+            partsResultsContainer.innerHTML =
+              "<p>No parts found matching your search.</p>";
+          } else {
+            snapshot.forEach((doc) => {
+              const partData = doc.data();
+              const partItem = document.createElement("div");
+              partItem.className = "parts-result-item";
+              partItem.innerHTML = `
+                <p><strong>Name:</strong> ${partData.name || "N/A"}</p>
+                <p><strong>SKU:</strong> ${partData.sku || "N/A"}</p>
+                <p><strong>Description:</strong> ${
+                  partData.description || "No description"
+                }</p>
+                <p><strong>Quantity:</strong> ${
+                  partData.quantity !== undefined ? partData.quantity : "N/A"
+                }</p>
+              `;
+              partsResultsContainer.appendChild(partItem);
+            });
+          }
+        } catch (error) {
+          console.error("Error searching parts:", error);
+          partsResultsContainer.innerHTML = "<p>Error performing search.</p>";
+        }
+      }
+
+      searchPartsBtn.addEventListener("click", searchParts);
+      partSearchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          searchParts();
+        }
+      });
+
+      loadReports(); // Initial load of reports
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script>
+      const auth = firebase.auth();
+
+      // Persist session across page loads
+      auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+      const allowedDomain = "@ubreakifix.com";
+
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          const email = user.email || "";
+          if (!email.endsWith(allowedDomain)) {
+            alert("Access denied: unauthorized email domain.");
+            auth.signOut();
+            window.location.href = "index.html";
+          }
+        } else {
+          if (
+            window.location.pathname !== "/index.html" &&
+            window.location.pathname !== "/"
+          ) {
+            window.location.href = "index.html";
+          }
+        }
+      });
+
+      function signInWithGoogle() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch((error) => {
+          console.error("Login error:", error);
+          alert("Login failed.");
+        });
+      }
+
+      function signOut() {
+        auth.signOut().then(() => {
+          window.location.href = "index.html";
+        });
+      }
+    </script>
+  </body>
+</html>
