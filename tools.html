@@ -252,17 +252,7 @@
   <body>
     <div class="background"></div>
 
-    <div id="passwordOverlay" class="password-overlay">
-      <div class="password-prompt card">
-        <h2>Enter Admin Password</h2>
-        <input type="password" id="passwordInput" placeholder="Password" />
-        <div class="button-group">
-          <button id="confirmBtn">Confirm</button>
-          <button id="cancelBtn">Cancel</button>
-        </div>
-        <p id="errorMsg" class="error-msg"></p>
-      </div>
-    </div>
+   
 
     <div class="container">
       <div class="card">
@@ -356,40 +346,6 @@
             console.log("On index.html and no user. Waiting for sign-in."); // Should only happen on index.html
           }
         }
-      });
-
-      // --- Password Protection Logic ---
-      const passwordOverlay = document.getElementById("passwordOverlay");
-      const passwordInput = document.getElementById("passwordInput");
-      const confirmBtn = document.getElementById("confirmBtn");
-      const cancelBtn = document.getElementById("cancelBtn");
-      const errorMsg = document.getElementById("errorMsg");
-      const correctPassword = "TakeOver512"; // Same password as reports.html
-
-      // Show password prompt on page load
-      window.onload = () => {
-        passwordOverlay.style.display = "flex";
-        passwordInput.focus();
-      };
-
-      confirmBtn.addEventListener("click", () => {
-        if (passwordInput.value === correctPassword) {
-          passwordOverlay.style.display = "none";
-          // If authenticated, proceed to fetch data or enable controls
-        } else {
-          errorMsg.textContent = "Incorrect password, please try again.";
-          passwordInput.value = "";
-          passwordInput.focus();
-        }
-      });
-
-      cancelBtn.addEventListener("click", () => {
-        // If canceled, redirect back to index.html or previous page
-        window.location.href = "index.html";
-      });
-
-      passwordInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") confirmBtn.click();
       });
 
       // --- Dark Mode Toggle Logic (from BOD.html) ---
