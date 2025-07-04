@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Tools</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <style>
+      :root {
+        --bg-color: #f7f7f7;
+        --text-color: #000;
+        --card-bg: #fff;
+        --button-bg: #4caf50;
+        --button-text: white;
+        --input-bg: #f9f9f9;
+        --input-border: #ddd;
+        --border-radius: 8px;
+        --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      body.dark-mode {
+        --bg-color: #121212;
+        --text-color: #eee;
+        --card-bg: #1e1e1e;
+        --button-bg: #bb86fc;
+        --button-text: #000;
+        --input-bg: #2a2a2a;
+        --input-border: #555;
+        --shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: background-color 0.3s, color 0.3s;
+      }
+
+      .background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("images/lofi_day.jpg") no-repeat center center;
+        background-size: cover;
+        opacity: 0.4;
+        z-index: -1;
+      }
+
+      .container {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        z-index: 1;
+      }
+
+      .card {
+        background-color: var(--card-bg);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        padding: 30px;
+        margin: 20px 0;
+        width: 100%;
+        max-width: 500px;
+        text-align: center;
+        transition: background-color 0.3s, box-shadow 0.3s;
+      }
+
+      h1 {
+        color: var(--text-color);
+        margin-bottom: 25px;
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+        text-align: left;
+      }
+
+      .input-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: var(--text-color);
+      }
+
+      .input-group input[type="text"] {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--input-border);
+        border-radius: var(--border-radius);
+        background-color: var(--input-bg);
+        color: var(--text-color);
+        font-size: 1em;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        transition: border-color 0.3s, background-color 0.3s;
+      }
+
+      .input-group input[type="text"]:focus {
+        outline: none;
+        border-color: var(--button-bg);
+      }
+
+      .button-group {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 20px;
+      }
+
+      button {
+        padding: 12px 25px;
+        border: none;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        font-size: 1em;
+        font-weight: bold;
+        transition: background-color 0.3s, transform 0.2s ease-in-out;
+        background-color: var(--button-bg);
+        color: var(--button-text);
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        opacity: 0.9;
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      .status-message {
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: var(--border-radius);
+        font-weight: bold;
+      }
+
+      .status-message.success {
+        background-color: #d4edda;
+        color: #155724;
+      }
+
+      .status-message.error {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+
+      .theme-toggle {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: var(--button-bg);
+        color: var(--button-text);
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        font-size: 1.5em;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        box-shadow: var(--shadow);
+        z-index: 999;
+        transition: background-color 0.3s, color 0.3s, transform 0.2s;
+      }
+
+      .theme-toggle:hover {
+        transform: scale(1.1);
+      }
+
+      .theme-toggle i {
+        color: var(--button-text);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="background"></div>
+
+    <div class="container">
+      <div class="card">
+        <h1>Admin Tools</h1>
+
+        <div class="input-group">
+          <label for="userName">User Name:</label>
+          <input
+            type="text"
+            id="userName"
+            placeholder="e.g., Blake, Taylor, Jesse"
+          />
+          <div class="button-group">
+            <button id="addUserBtn">Add User</button>
+            <button id="removeUserBtn" class="remove-btn">Remove User</button>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="vanName">Van Name:</label>
+          <input type="text" id="vanName" placeholder="e.g., Van 1, Van 2" />
+          <div class="button-group">
+            <button id="addVanBtn">Add Van</button>
+            <button id="removeVanBtn" class="remove-btn">Remove Van</button>
+          </div>
+        </div>
+
+        <!-- 🆕 Parts Feature Toggle -->
+        <div class="input-group">
+          <label>
+            <input type="checkbox" id="partsFeatureToggle" />
+            Enable Parts Check-In/Out
+          </label>
+          <div class="button-group">
+            <button id="savePartsFeatureToggle">Save</button>
+          </div>
+        </div>
+
+        <p id="statusMessage" class="status-message"></p>
+      </div>
+    </div>
+
+    <button id="themeToggle" class="theme-toggle">
+      <i class="fas fa-moon"></i>
+    </button>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyAqSsrM59dxLgl-dm6OJGuDW32EaDdqMjs",
+        authDomain: "eod-tracker.firebaseapp.com",
+        projectId: "eod-tracker",
+        storageBucket: "eod-tracker.firebasestorage.app",
+        messagingSenderId: "642820935153",
+        appId: "1:642820935153:web:8b23d0f430ad07e9680850",
+      };
+
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      const db = firebase.firestore();
+      const auth = firebase.auth();
+
+      auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+      const allowedDomain = "@ubreakifix.com";
+
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          const email = user.email || "";
+          if (!email.endsWith(allowedDomain)) {
+            alert("Access denied: unauthorized email domain.");
+            auth.signOut();
+            window.location.href = "index.html";
+          }
+        } else {
+          if (
+            window.location.pathname !== "/index.html" &&
+            window.location.pathname !== "/"
+          ) {
+            window.location.href = "index.html";
+          }
+        }
+      });
+
+      const themeToggle = document.getElementById("themeToggle");
+      const body = document.body;
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const savedTheme = localStorage.getItem("theme");
+        if (savedTheme === "dark") {
+          body.classList.add("dark-mode");
+          themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        } else {
+          themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+        }
+      });
+
+      themeToggle.addEventListener("click", () => {
+        body.classList.toggle("dark-mode");
+        if (body.classList.contains("dark-mode")) {
+          localStorage.setItem("theme", "dark");
+          themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        } else {
+          localStorage.setItem("theme", "light");
+          themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+        }
+      });
+
+      const userNameInput = document.getElementById("userName");
+      const addUserBtn = document.getElementById("addUserBtn");
+      const removeUserBtn = document.getElementById("removeUserBtn");
+      const vanNameInput = document.getElementById("vanName");
+      const addVanBtn = document.getElementById("addVanBtn");
+      const removeVanBtn = document.getElementById("removeVanBtn");
+      const statusMessage = document.getElementById("statusMessage");
+
+      const partsFeatureToggle = document.getElementById("partsFeatureToggle");
+      const savePartsFeatureToggleBtn = document.getElementById("savePartsFeatureToggle");
+
+      async function loadPartsFeatureSetting() {
+  try {
+    const doc = await db.collection("config").doc("features").get();
+    if (doc.exists && doc.data().partsCheckEnabled) {
+      partsFeatureToggle.checked = true;
+    }
+  } catch (error) {
+    console.error("Error loading parts feature setting:", error);
+  }
+}
+
+loadPartsFeatureSetting();
+
+savePartsFeatureToggleBtn.addEventListener("click", async () => {
+  const isEnabled = partsFeatureToggle.checked;
+  try {
+    await db.collection("config").doc("features").set(
+      {
+        partsCheckEnabled: isEnabled,
+      },
+      { merge: true }
+    );
+    showStatus("Parts feature setting saved!", true);
+  } catch (error) {
+    console.error("Error saving parts feature setting:", error);
+    showStatus("Error saving setting. See console for details.", false);
+  }
+});
+
+
+      function showStatus(message, isSuccess) {
+        statusMessage.textContent = message;
+        statusMessage.className = "status-message";
+        if (isSuccess) {
+          statusMessage.classList.add("success");
+        } else {
+          statusMessage.classList.add("error");
+        }
+        setTimeout(() => {
+          statusMessage.textContent = "";
+          statusMessage.className = "status-message";
+        }, 5000);
+      }
+
+      addUserBtn.addEventListener("click", async () => {
+        const userName = userNameInput.value.trim();
+        if (userName) {
+          try {
+            await db.collection("users").doc(userName.toLowerCase()).set({ name: userName });
+            showStatus(`User '${userName}' added successfully!`, true);
+            userNameInput.value = "";
+          } catch (error) {
+            console.error("Error adding user:", error);
+            showStatus(`Error adding user: ${error.message}`, false);
+          }
+        } else {
+          showStatus("Please enter a user name.", false);
+        }
+      });
+
+      removeUserBtn.addEventListener("click", async () => {
+        const userName = userNameInput.value.trim();
+        if (userName) {
+          try {
+            await db.collection("users").doc(userName.toLowerCase()).delete();
+            showStatus(`User '${userName}' removed successfully!`, true);
+            userNameInput.value = "";
+          } catch (error) {
+            console.error("Error removing user:", error);
+            showStatus(`Error removing user: ${error.message}`, false);
+          }
+        } else {
+          showStatus("Please enter a user name to remove.", false);
+        }
+      });
+
+      addVanBtn.addEventListener("click", async () => {
+        const vanName = vanNameInput.value.trim();
+        if (vanName) {
+          try {
+            await db.collection("vans").doc(vanName.toLowerCase()).set({ name: vanName });
+            showStatus(`Van '${vanName}' added successfully!`, true);
+            vanNameInput.value = "";
+          } catch (error) {
+            console.error("Error adding van:", error);
+            showStatus(`Error adding van: ${error.message}`, false);
+          }
+        } else {
+          showStatus("Please enter a van name.", false);
+        }
+      });
+
+      removeVanBtn.addEventListener("click", async () => {
+        const vanName = vanNameInput.value.trim();
+        if (vanName) {
+          try {
+            await db.collection("vans").doc(vanName.toLowerCase()).delete();
+            showStatus(`Van '${vanName}' removed successfully!`, true);
+            vanNameInput.value = "";
+          } catch (error) {
+            console.error("Error removing van:", error);
+            showStatus(`Error removing van: ${error.message}`, false);
+          }
+        } else {
+          showStatus("Please enter a van name to remove.", false);
+        }
+      });
+    </script>
+  </body>
+</html>
